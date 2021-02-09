@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.emp.model.EmpVO" table="employee" >
+        
+        <id name="emp_id" column="emp_id">
+            <generator class="generator.EmpGenerator"/>
+        </id>
+        
+        <property name="emp_user_id" column="emp_user_id" />
+        <property name="emp_user_pwd" column="emp_user_pwd" />
+        <property name="emp_name" column="emp_name" />
+        <property name="emp_status" column="emp_status" />
+           
+        <set name="empFuncs" table="emp_func" lazy="false" cascade="none"  inverse="true"  order-by="emp_id asc">			
+			<key>
+				<column name="emp_id" />
+			</key>
+			<one-to-many class="com.emp_func.model.EmpFuncVO" />
+		</set>    
+        
+    </class>
+</hibernate-mapping>
+
