@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.shop_order.model.ShopOrderVO" table="shop_order">
+
+		<id name="shop_order_id" column="shop_order_id">
+			<generator class="generator.ShopOrderGenerator"/>
+		</id>
+
+		<property name="mem_id" column="mem_id" />
+		<property name="payment" column="payment" />
+		<property name="time" column="time" />
+		<property name="shop_total_amount" column="shop_total_amount" />
+		<property name="status" column="status" />
+
+		<set name="shopOrderDetails" table="shop_order_detail" lazy="false" cascade="all"  inverse="true"  order-by="shop_order_detail asc">			
+			<key>
+				<column name="shop_order_detail_id" />
+			</key>
+			<one-to-many class="com.shop_order_detail.model.ShopOrderDetailVO" />
+		</set>
+
+	</class>
+</hibernate-mapping>
+

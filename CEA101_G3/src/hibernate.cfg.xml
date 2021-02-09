@@ -40,6 +40,7 @@
 		<mapping resource="com/func/model/func.hbm.xml" />
 		<mapping resource="com/emp/model/emp.hbm.xml" />
 		<mapping resource="com/emp_func/model/emp_func.hbm.xml" />
+		<mapping resource="com/shop_order/model/shop_order.hbm.xml" />
 	</session-factory>
 	
 </hibernate-configuration>

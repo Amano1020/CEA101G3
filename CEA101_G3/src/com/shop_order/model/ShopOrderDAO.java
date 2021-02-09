@@ -1,354 +1,122 @@
 package com.shop_order.model;
 
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+
+import com.emp.model.EmpVO;
 import com.roomorder.model.RoomOrderVO;
 import com.shop_order_detail.model.ShopOrderDetailDAO;
 import com.shop_order_detail.model.ShopOrderDetailVO;
 
+import hibernate.util.HibernateUtil;
+
 public class ShopOrderDAO implements ShopOrderDAO_interface {
 
 
-	//連線池
-	private static DataSource ds = null;
-	static {
-		try {
-			Context ctx = new javax.naming.InitialContext();
-			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/GDB");
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static final String INSERT_STMT = "INSERT INTO SHOP_ORDER (SHOP_ORDER_ID,MEM_ID,PAYMENT,TIME,SHOP_TOTAL_AMOUNT,STATUS)"
-			+ "VALUES('SD'|| SHOP_ORDER_ID_SEQ.NEXTVAL,?,?,?,?,?)";
 	public static final String GET_ALL_STMT = "SELECT SHOP_ORDER_ID,MEM_ID,PAYMENT,to_char(TIME,'yyyy-mm-dd') TIME,SHOP_TOTAL_AMOUNT,STATUS FROM SHOP_ORDER ORDER BY SHOP_ORDER_ID";
-
-	public static final String GET_ONE_STMT = "SELECT SHOP_ORDER_ID,MEM_ID,PAYMENT,to_char(TIME,'yyyy-mm-dd') TIME,SHOP_TOTAL_AMOUNT,STATUS FROM SHOP_ORDER WHERE SHOP_ORDER_ID = ?";
-
-	public static final String DELETE = "DELETE FROM SHOP_ORDER WHERE SHOP_ORDER_ID = ?";
-
-	public static final String UPDATE = "UPDATE SHOP_ORDER SET MEM_ID=?, PAYMENT=?, TIME=?, SHOP_TOTAL_AMOUNT=?, STATUS=? WHERE SHOP_ORDER_ID = ?";
-
 	public static final String GETONE_BY_MEMID = "SELECT * FROM SHOP_ORDER WHERE MEM_ID = ?";
 	@Override
-	public void insert(ShopOrderVO shopOrderVO) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-
+	public void insert(ShopOrderVO shop_orderVO) {
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(INSERT_STMT);
-
-
-			pstmt.setString(1, shopOrderVO.getMem_id());
-			pstmt.setString(2, shopOrderVO.getPayment());
-			pstmt.setDate(3, shopOrderVO.getTime());
-			pstmt.setFloat(4, shopOrderVO.getShop_total_amount());
-			pstmt.setInt(5, shopOrderVO.getStatus());
-
-			pstmt.executeUpdate();
-
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
+			session.beginTransaction();
+			session.saveOrUpdate(shop_orderVO);
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 	}
-
 	@Override
-	public void update(ShopOrderVO shopOrderVO) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-
+	public void update(ShopOrderVO shop_orderVO) {
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(UPDATE);
-			
-			pstmt.setString(1, shopOrderVO.getMem_id());
-			pstmt.setString(2, shopOrderVO.getPayment());
-			pstmt.setDate(3, shopOrderVO.getTime());
-			pstmt.setFloat(4, shopOrderVO.getShop_total_amount());
-			pstmt.setInt(5, shopOrderVO.getStatus());
-			pstmt.setString(6, shopOrderVO.getShop_order_id());
-
-			pstmt.executeUpdate();
-
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
+			session.beginTransaction();
+			session.saveOrUpdate(shop_orderVO);
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 	}
-
 	@Override
 	public void delete(String shop_order_id) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(DELETE);
+			session.beginTransaction();
 
-			pstmt.setString(1, shop_order_id);
-
-			pstmt.executeUpdate();
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
+			ShopOrderVO vo = session.get(ShopOrderVO.class, shop_order_id);
+			session.delete(vo);
+			
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
-
 	}
-
 	@Override
 	public ShopOrderVO findByPrimaryKey(String shop_order_id) {
-		
 		ShopOrderVO shopOrderVO = null;
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(GET_ONE_STMT);
-
-			pstmt.setString(1, shop_order_id);
-
-			rs = pstmt.executeQuery();
-			
-			while (rs.next()) {
-				shopOrderVO = new ShopOrderVO();
-				shopOrderVO.setShop_order_id(rs.getString("shop_order_id"));
-				shopOrderVO.setMem_id(rs.getString("mem_id"));
-				shopOrderVO.setPayment(rs.getString("payment"));
-				shopOrderVO.setTime(rs.getDate("time"));
-				shopOrderVO.setShop_total_amount(rs.getInt("shop_total_amount"));
-				shopOrderVO.setStatus(rs.getInt("status"));
-			}
-			
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
+			session.beginTransaction();
+			shopOrderVO = session.get(ShopOrderVO.class, shop_order_id);
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 		return shopOrderVO;
 	}
-
 	@Override
 	public List<ShopOrderVO> getAll() {
-		List<ShopOrderVO> list = new ArrayList<ShopOrderVO>();
-		ShopOrderVO shopOrderVO = null;
-
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(GET_ALL_STMT);
-			rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				shopOrderVO = new ShopOrderVO();
-
-				shopOrderVO.setShop_order_id(rs.getString("shop_order_id"));
-				shopOrderVO.setMem_id(rs.getString("mem_id"));
-				shopOrderVO.setPayment(rs.getString("payment"));
-				shopOrderVO.setTime(rs.getDate("time"));
-				shopOrderVO.setShop_total_amount(rs.getInt("shop_total_amount"));
-				shopOrderVO.setStatus(rs.getInt("status"));
-				list.add(shopOrderVO);
-			}
-
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
-		}
-		return list;
+		// TODO Auto-generated method stub
+		return null;
 	}
-
-	@Override
-	public void insertWithOrderDetail(ShopOrderVO shopOrderVO, List<ShopOrderDetailVO> list) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		
-		try {
-			con = ds.getConnection();
-			
-			// 1●設定於 pstm.executeUpdate()之前
-			con.setAutoCommit(false);
-			
-			String cols[] = {"SHOP_ORDER_ID"};
-			pstmt = con.prepareStatement(INSERT_STMT, cols);
-			pstmt.setString(1, shopOrderVO.getMem_id());
-			pstmt.setString(2, shopOrderVO.getPayment());
-			pstmt.setDate(3, shopOrderVO.getTime());
-			pstmt.setFloat(4, shopOrderVO.getShop_total_amount());
-			pstmt.setInt(5, shopOrderVO.getStatus());
-			
-			pstmt.executeUpdate();
-			
-			
-			String next_shop_order_id = null;
-			ResultSet rs = pstmt.getGeneratedKeys();
-			
-			if(rs.next()) {
-				next_shop_order_id = rs.getString(1);
-			}
-			rs.close();
-			
-
-			ShopOrderDetailDAO dao = new ShopOrderDetailDAO();
-			for(ShopOrderDetailVO vo : list) {
-				vo.setShop_order_id(next_shop_order_id);
-				dao.insert2(vo, con);
-			}
-			
-			con.commit();
-			con.setAutoCommit(true);
-			
-		}catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	@Override
 	public List<ShopOrderVO> getByMemId(String mem_id) {
-		List<ShopOrderVO> list = new ArrayList<>();
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ShopOrderVO shopOrderVO = null;
-		ResultSet rs = null;
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void insertWithOrderDetail(ShopOrderVO shopOrderVO, List<ShopOrderDetailVO> list) {
+		// TODO Auto-generated method stub
 		
-			try {
-				con = ds.getConnection();
-				pstmt = con.prepareStatement(GETONE_BY_MEMID);
-				pstmt.setString(1, mem_id);
-				rs = pstmt.executeQuery();
-				
-				while(rs.next()) {
-					shopOrderVO = new ShopOrderVO();
-					shopOrderVO.setShop_order_id(rs.getString("shop_order_id"));
-					shopOrderVO.setMem_id(rs.getString("mem_id"));
-					shopOrderVO.setPayment(rs.getString("payment"));
-					shopOrderVO.setTime(rs.getDate("time"));
-					shopOrderVO.setShop_total_amount(rs.getInt("shop_total_amount"));
-					shopOrderVO.setStatus(rs.getInt("status"));
-					list.add(shopOrderVO);
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				if (pstmt != null) {
-					try {
-						pstmt.close();
-					} catch (SQLException se) {
-						se.printStackTrace(System.err);
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
-				}
-			}	
-			return list;
 	}
 
-
+	public static void main(String[] args) {
+		ShopOrderDAO dao = new ShopOrderDAO();
+		ShopOrderVO vo = new ShopOrderVO();
+		
+		//insert
+//		vo.setMem_id("M10001");
+//		vo.setPayment("creditcard");
+//		vo.setTime(new Date(System.currentTimeMillis()));
+//		vo.setShop_total_amount(100000F);
+//		vo.setStatus(1);
+//		dao.insert(vo);
+		
+		//update
+//		vo.setShop_order_id("SD10012");
+//		vo.setMem_id("M10001");
+//		vo.setPayment("creditcard");
+//		vo.setTime(new Date(System.currentTimeMillis()));
+//		vo.setShop_total_amount(999999F);
+//		vo.setStatus(1);
+//		dao.update(vo);
+		
+		//delete
+//		dao.delete("SD10013");
+		
+		//getOne
+		dao.findByPrimaryKey("SD10001");
+	}
 }
