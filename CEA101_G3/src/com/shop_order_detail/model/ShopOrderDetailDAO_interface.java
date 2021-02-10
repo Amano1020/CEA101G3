@@ -9,5 +9,4 @@ public interface ShopOrderDetailDAO_interface {
 	public List<ShopOrderDetailVO> findByPrimaryKey(String shop_order_id);
 	public List<ShopOrderDetailVO> getAll();
 	
-	public void insert2 (ShopOrderDetailVO shopOrderDetailVO , java.sql.Connection con);
 }

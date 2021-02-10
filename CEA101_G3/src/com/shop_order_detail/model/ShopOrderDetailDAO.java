@@ -7,282 +7,132 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.hibernate.query.Query;
+import org.hibernate.Session;
+
+import com.shop_order.model.ShopOrderVO;
+
+import hibernate.util.HibernateUtil;
+
 public class ShopOrderDetailDAO implements ShopOrderDetailDAO_interface{
 
-
-	//連線池
-	private static DataSource ds = null;
-	static {
-		try {
-			Context ctx = new javax.naming.InitialContext();
-			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/GDB");
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static final String INSERT_STMT = "INSERT INTO SHOP_ORDER_DETAIL (SHOP_ORDER_ID , ITEM_ID , ITEM_PROMOTION_ID , NOTE , QUANTITY , ITEM_PRICE)"
-			+ "VALUES(?,?,?,?,?,?)";
-	public static final String GET_ALL_STMT = "SELECT * FROM SHOP_ORDER_DETAIL ORDER BY SHOP_ORDER_ID";
-	public static final String GET_ONE_STMT = "SELECT * FROM SHOP_ORDER_DETAIL WHERE SHOP_ORDER_ID = ?";
-	public static final String DELETE = "DELETE FROM SHOP_ORDER_DETAIL WHERE SHOP_ORDER_ID = ?";
-	public static final String UPDATE = "UPDATE SHOP_ORDER_DETAIL SET ITEM_ID=?, ITEM_PROMOTION_ID=?, NOTE=?, QUANTITY=?, ITEM_PRICE=? WHERE SHOP_ORDER_ID = ?";
-	
-	
+	public static final String GET_ALL_STMT = "from ShopOrderDetailVO order by shop_order_id";
+	public static final String GET_ONE_STMT = "from ShopOrderDetailVO where shop_order_id=?0";
 	public void insert(ShopOrderDetailVO shopOrderDetailVO) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt =con.prepareStatement(INSERT_STMT);
-			
-			pstmt.setString(1, shopOrderDetailVO.getShop_order_id());
-			pstmt.setString(2, shopOrderDetailVO.getItem_id());
-			pstmt.setString(3, shopOrderDetailVO.getItem_promotion_id());
-			pstmt.setString(4, shopOrderDetailVO.getNote());
-			pstmt.setInt(5, shopOrderDetailVO.getQuantity());
-			pstmt.setInt(6,shopOrderDetailVO.getItem_price());
-			
-			pstmt.executeUpdate();
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
-		}
-		
+			session.beginTransaction();
+			session.save(shopOrderDetailVO);
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
+		}	
 	}
 	
 	public void update(ShopOrderDetailVO shopOrderDetailVO) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			
-			pstmt = con.prepareStatement(UPDATE);
-			pstmt.setString(1, shopOrderDetailVO.getItem_id());
-			pstmt.setString(2, shopOrderDetailVO.getItem_promotion_id());
-			pstmt.setString(3, shopOrderDetailVO.getNote());
-			pstmt.setInt(4, shopOrderDetailVO.getQuantity());
-			pstmt.setInt(5, shopOrderDetailVO.getItem_price());
-			pstmt.setString(6,shopOrderDetailVO.getShop_order_id());
-			
-			pstmt.executeUpdate();
-		}catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
-		}
+			session.beginTransaction();
+			session.saveOrUpdate(shopOrderDetailVO);
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
+		}	
 	}
 
 	public void delete(String shop_order_id) {
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(DELETE);
+			session.beginTransaction();
+			Query query = session.createQuery("delete ShopOrderDetailVO where shop_order_id=?0");
+			query.setParameter(0, shop_order_id);
+			query.executeUpdate();
 			
-			pstmt.setString(1,shop_order_id);
-			
-			pstmt.executeUpdate();
-			
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 	}
 		
 	public List<ShopOrderDetailVO> findByPrimaryKey(String shop_order_id) {
 		List<ShopOrderDetailVO> list = new ArrayList<ShopOrderDetailVO>();
-		ShopOrderDetailVO shopOrderDetailVO = null;
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(GET_ONE_STMT);
-			
-			pstmt.setString(1,shop_order_id);
-			
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
-				shopOrderDetailVO = new ShopOrderDetailVO();
-				
-				shopOrderDetailVO.setShop_order_id(rs.getString("shop_order_id"));
-				shopOrderDetailVO.setItem_id(rs.getString("item_id"));
-				shopOrderDetailVO.setItem_promotion_id(rs.getString("item_promotion_id"));
-				shopOrderDetailVO.setNote(rs.getString("note"));
-				shopOrderDetailVO.setQuantity(rs.getInt("quantity"));
-				shopOrderDetailVO.setItem_price(rs.getInt("item_price"));
-				list.add(shopOrderDetailVO);
-			}
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
+			session.beginTransaction();
+			Query<ShopOrderDetailVO> query = session.createQuery(GET_ONE_STMT, ShopOrderDetailVO.class);
+			query.setParameter(0, shop_order_id);
+			list = query.getResultList();
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 		return list;
 	}
 	
 	public List<ShopOrderDetailVO> getAll(){
 		List<ShopOrderDetailVO> list = new ArrayList<ShopOrderDetailVO>();
-		ShopOrderDetailVO shopOrderDetailVO = null;
-		Connection con = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
+		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
-			con = ds.getConnection();
-			pstmt = con.prepareStatement(GET_ALL_STMT);
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
-				shopOrderDetailVO = new ShopOrderDetailVO();
-				
-				shopOrderDetailVO.setShop_order_id(rs.getString("shop_order_id"));
-				shopOrderDetailVO.setItem_id(rs.getString("item_id"));
-				shopOrderDetailVO.setItem_promotion_id(rs.getString("item_promotion_id"));
-				shopOrderDetailVO.setNote(rs.getString("note"));
-				shopOrderDetailVO.setQuantity(rs.getInt("quantity"));
-				shopOrderDetailVO.setItem_price(rs.getInt("item_price"));
-				list.add(shopOrderDetailVO);
-			}
-		} catch (SQLException se) {
-			throw new RuntimeException("A database error occured. " + se.getMessage());
-			// Clean up JDBC resources
-		} finally{
-			if(rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if(pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if(con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			session.beginTransaction();
+			Query<ShopOrderDetailVO> query = session.createQuery(GET_ALL_STMT, ShopOrderDetailVO.class);
+			list = query.getResultList();
+			session.getTransaction().commit();
+		} catch (RuntimeException ex) {
+			session.getTransaction().rollback();
+			throw ex;
 		}
 		return list;
 	}
-	
-	@Override
-	public void insert2(ShopOrderDetailVO shopOrderDetailVO, Connection con) {
-		PreparedStatement pstmt = null;
+
+	public static void main(String[] args) {
+		ShopOrderDetailDAO dao = new ShopOrderDetailDAO();
+		ShopOrderDetailVO vo = new ShopOrderDetailVO();
 		
-		try {
-			pstmt = con.prepareStatement(INSERT_STMT);
-			pstmt.setString(1,shopOrderDetailVO.getShop_order_id());	
-			pstmt.setString(2,shopOrderDetailVO.getItem_id());
-			pstmt.setString(3,shopOrderDetailVO.getItem_promotion_id());
-			pstmt.setString(4,shopOrderDetailVO.getNote());
-			pstmt.setInt(5,shopOrderDetailVO.getQuantity());
-			pstmt.setFloat(6,shopOrderDetailVO.getItem_price());
-			
-			pstmt.executeUpdate();
-			
-			
-			
-		} catch (SQLException e) {
-			if (con != null) {
-				try {
-					// 3●設定於當有exception發生時之catch區塊內
-					System.err.print("Transaction is being ");
-					System.err.println("rolled back-由-emp");
-					con.rollback();
-				} catch (SQLException excep) {
-					throw new RuntimeException("rollback error occured. "
-							+ excep.getMessage());
-				}
-			}
-			throw new RuntimeException("A database error occured. "
-					+ e.getMessage());
-			// Clean up JDBC resources
-		} finally {
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (SQLException se) {
-					se.printStackTrace(System.err);
-				}
-			}
-		}
+		//insert
+//		vo.setShop_order_id("SD10001");
+//		vo.setItem_id("I10002");
+//		vo.setItem_promotion_id("IP10001");
+//		vo.setNote("nice");
+//		vo.setQuantity(2);
+//		vo.setItem_price(300);
+//		dao.insert(vo);
 		
+		//update
+//		vo.setShop_order_id("SD10014");
+//		vo.setItem_id("I10001");
+//		vo.setItem_promotion_id("IP10001");
+//		vo.setNote("niceeeeeeee");
+//		vo.setQuantity(2);
+//		vo.setItem_price(300);
+//		dao.update	(vo);
+		
+		//delete
+//		dao.delete("SD10010");
+		
+		//getOne
+//		List<ShopOrderDetailVO> list = dao.findByPrimaryKey("SD10001");
+//		for(ShopOrderDetailVO shdVO : list) {
+//			System.out.print(shdVO.getShop_order_id() + ",");
+//			System.out.print(shdVO.getItem_id() + ",");
+//			System.out.print(shdVO.getItem_price() + ",");
+//			System.out.print(shdVO.getItem_promotion_id() + ",");
+//			System.out.print(shdVO.getQuantity() + ",");
+//			System.out.println(shdVO.getNote());
+//		}
+		
+		//getAll
+//		List<ShopOrderDetailVO> list = dao.getAll();
+//		for(ShopOrderDetailVO shdVO : list) {
+//			System.out.print(shdVO.getShop_order_id() + ",");
+//			System.out.print(shdVO.getItem_id() + ",");
+//			System.out.print(shdVO.getItem_price() + ",");
+//			System.out.print(shdVO.getItem_promotion_id() + ",");
+//			System.out.print(shdVO.getQuantity() + ",");
+//			System.out.println(shdVO.getNote());
+//		}		
 	}
 }

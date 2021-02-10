@@ -13,7 +13,7 @@ public class ShopOrderVO implements java.io.Serializable {
 	private Float shop_total_amount;
 	private Integer status;
 	
-	private Set<ShopOrderDetailVO> shopOrderDetails = new HashSet();
+	private Set<ShopOrderDetailVO> shopOrderDetails = new HashSet<ShopOrderDetailVO>();
 
 	public String getShop_order_id() {
 		return shop_order_id;

@@ -15,9 +15,9 @@
 		<property name="shop_total_amount" column="shop_total_amount" />
 		<property name="status" column="status" />
 
-		<set name="shopOrderDetails" table="shop_order_detail" lazy="false" cascade="all"  inverse="true"  order-by="shop_order_detail asc">			
+		<set name="shopOrderDetails" table="shop_order_detail" lazy="false" cascade="all"  inverse="true"  order-by="shop_order_id asc">			
 			<key>
-				<column name="shop_order_detail_id" />
+				<column name="shop_order_id" />
 			</key>
 			<one-to-many class="com.shop_order_detail.model.ShopOrderDetailVO" />
 		</set>
