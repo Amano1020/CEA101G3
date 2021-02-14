@@ -221,7 +221,6 @@ public class ItemCategoryJDBCDAO implements ItemCategoryDAO_interface {
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
-
 				ItemCategoryVO = new ItemCategoryVO();
 				ItemCategoryVO.setItemCategoryId(rs.getString("item_category_id"));
 				ItemCategoryVO.setItemCategoryName(rs.getString("item_category_name"));

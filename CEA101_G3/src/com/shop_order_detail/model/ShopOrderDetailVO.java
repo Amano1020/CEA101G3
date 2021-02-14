@@ -1,7 +1,10 @@
 package com.shop_order_detail.model;
 
+import com.shop_order.model.ShopOrderVO;
+
 public class ShopOrderDetailVO implements java.io.Serializable{
 	private String shop_order_id;
+
 	private String item_id;
 	private	String item_promotion_id;
 	private String note;
@@ -45,4 +48,12 @@ public class ShopOrderDetailVO implements java.io.Serializable{
 		this.item_price = item_price;
 	}
 	
+	private ShopOrderVO shopOrderVO;
+
+	public ShopOrderVO getShopOrderVO() {
+		return shopOrderVO;
+	}
+	public void setShopOrderVO(ShopOrderVO shopOrderVO) {
+		this.shopOrderVO = shopOrderVO;
+	}
 }

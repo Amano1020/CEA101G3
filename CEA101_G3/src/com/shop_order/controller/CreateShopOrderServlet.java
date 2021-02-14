@@ -32,20 +32,11 @@ public class CreateShopOrderServlet extends HttpServlet {
 			try {
 				/*************************** 1.接收請求參數 ****************************************/
 				String mem_id = req.getParameter("mem_id");
-				String payment = "creditcard";
-				java.sql.Date time = new java.sql.Date(System.currentTimeMillis());
-
 				Float shop_total_amount = new Float(req.getParameter("amount"));
-				
 				Integer status = 1;
 				
-				ShopOrderVO shopOrderVO = new ShopOrderVO(); 
-				shopOrderVO.setMem_id(mem_id);
-				shopOrderVO.setPayment(payment);
-				shopOrderVO.setTime(time);
-				shopOrderVO.setShop_total_amount(shop_total_amount);
-				shopOrderVO.setStatus(status);
-				List<ShopOrderDetailVO> list = new ArrayList<ShopOrderDetailVO>(); 
+
+				Set<ShopOrderDetailVO> set = new LinkedHashSet<ShopOrderDetailVO>();
 				ShopOrderDetailVO detailVO = null;
 				for(int i = 0 ; i <buylist.size(); i++ ) {
 					Item item = buylist.get(i);
@@ -55,11 +46,19 @@ public class CreateShopOrderServlet extends HttpServlet {
 					detailVO.setItem_promotion_id("IP10001");
 					detailVO.setQuantity(item.getQuantity());
 					detailVO.setNote("good");
-					list.add(detailVO);		
+					set.add(detailVO);	
 				}
 				
+				ShopOrderVO shopOrderVO = new ShopOrderVO(); 
+				shopOrderVO.setMem_id(mem_id);
+				shopOrderVO.setPayment("creditcard");
+				shopOrderVO.setTime(new java.sql.Date(System.currentTimeMillis()));
+				shopOrderVO.setShop_total_amount(shop_total_amount);
+				shopOrderVO.setStatus(status);
+				shopOrderVO.setShopOrderDetails(set);
+				
 				ShopOrderService shopOrderSvc = new ShopOrderService();
-				shopOrderSvc.addWithOrderDetail(shopOrderVO, list);
+				shopOrderSvc.addWithOrderDetail(shopOrderVO);
 				
 				//ws
 				Set<javax.websocket.Session> orderSession = (Set<javax.websocket.Session>) session.getAttribute("orderSession");

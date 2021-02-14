@@ -4,17 +4,15 @@
 
 <hibernate-mapping>
 	<class name="com.shop_order_detail.model.ShopOrderDetailVO" table="shop_order_detail">
-
 		<composite-id>
-			<key-property name="shop_order_id" column="shop_order_id"></key-property>
-			<key-property name="item_id" column="item_id"></key-property>
+			<key-many-to-one name="shopOrderVO" class="com.shop_order.model.ShopOrderVO" column="shop_order_id" />
+			<key-property name="item_id" column="item_id"></key-property>	
 		</composite-id>
 		<property name="item_promotion_id" column="item_promotion_id" />
 		<property name="note" column="note" />
 		<property name="quantity" column="quantity" />
 		<property name="item_price" column="item_price" />
-
-
+	
 	</class>
 </hibernate-mapping>
 

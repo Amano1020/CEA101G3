@@ -1,6 +1,7 @@
 package com.shop_order_detail.model;
 
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 import javax.naming.Context;
@@ -90,16 +91,20 @@ public class ShopOrderDetailDAO implements ShopOrderDetailDAO_interface{
 
 	public static void main(String[] args) {
 		ShopOrderDetailDAO dao = new ShopOrderDetailDAO();
-		ShopOrderDetailVO vo = new ShopOrderDetailVO();
 		
+		
+		ShopOrderDetailVO vo = new ShopOrderDetailVO();
+		ShopOrderVO shopOrderVO = new ShopOrderVO();
+		shopOrderVO.setShop_order_id("SD10001");		
 		//insert
 //		vo.setShop_order_id("SD10001");
-//		vo.setItem_id("I10002");
-//		vo.setItem_promotion_id("IP10001");
-//		vo.setNote("nice");
-//		vo.setQuantity(2);
-//		vo.setItem_price(300);
-//		dao.insert(vo);
+		vo.setShopOrderVO(shopOrderVO);
+		vo.setItem_id("I10014");
+		vo.setItem_promotion_id("IP10001");
+		vo.setNote("nice");
+		vo.setQuantity(2);
+		vo.setItem_price(300);
+		dao.insert(vo);
 		
 		//update
 //		vo.setShop_order_id("SD10014");

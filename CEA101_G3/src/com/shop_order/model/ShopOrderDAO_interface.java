@@ -11,5 +11,4 @@ public interface ShopOrderDAO_interface {
 	public ShopOrderVO  findByPrimaryKey(String shop_order_id);
 	public List<ShopOrderVO> getAll();
 	public List<ShopOrderVO> getByMemId(String mem_id);
-	public void insertWithOrderDetail(ShopOrderVO shopOrderVO , List<ShopOrderDetailVO> list);
 }
